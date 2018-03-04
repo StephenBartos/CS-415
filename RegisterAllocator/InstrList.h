@@ -6,7 +6,7 @@
 
 void PrintInstruction(Instruction *);
 void PrintInstructionList(Instruction *);
-Instruction *ReadInstruction(FILE *);
+Instruction *ReadInstruction(char *);
 Instruction *ReadInstructionList(FILE *);
 
 #endif

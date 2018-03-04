@@ -4,9 +4,6 @@
 #include "InstrList.h"
 #include "Instr.h"
 
-// size of line buffer
-#define BUFSIZE 100
-
 void PrintInstruction(Instruction *instr) {
 
 }
@@ -25,16 +22,10 @@ void PrintInstructionList(Instruction *head) {
     }
 }
 
-Instruction *ReadInstruction(FILE *infile) {
+Instruction *ReadInstruction(char *buff) {
     Instruction *instr = NULL;
-    static char buff[BUFSIZE];
     char dummy;
-    char *str;
-
-    if (!infile) {
-        fprintf(stderr, "error: file error\n");
-        exit(EXIT_FAILURE);
-    }
+    char opcode[10];
 
     instr = calloc(1, sizeof(Instruction));
     if (!instr) {
@@ -43,92 +34,89 @@ Instruction *ReadInstruction(FILE *infile) {
     }
     instr->next = NULL;
     instr->prev = NULL;
-    // read line from infile
-    fscanf(infile, " %99s", buff);
-    printf("%s\n", buff);
     if (strnlen(buff, sizeof(buff)) == 0) {
         // line is empty
         free(instr);
         return NULL;
     }
-
-    if (!strcmp(buff, "loadAI")) {
+    sscanf(buff, "%s", opcode);
+    if (!strncmp(opcode, "loadAI", 6)) {
         // loadAI r1, c1 => r2
         instr->opcode = LOADAI;
-        fscanf(infile, "%c%d , %d => %c%d", &dummy, &(instr->field1),
-                                             &(instr->field2),
-                                             &dummy, &(instr->field3));
+        sscanf(buff, "%c%d , %d => %c%d",   &dummy, &(instr->field1),
+                                            &(instr->field2),
+                                            &dummy, &(instr->field3));
     }
-    else if (!strcmp(buff, "loadI")) {
+    else if (!strncmp(opcode, "loadI", 5)) {
         // loadI c1 => r1
-        fscanf(infile, "%d => %c%d", &(instr->field1), 
-                                     &dummy, &(instr->field2));
+        sscanf(buff, "%d => %c%d",          &(instr->field1), 
+                                            &dummy, &(instr->field2));
     }
-    else if (!strcmp(buff, "load")) { 
+    else if (!strncmp(opcode, "load", 4)) { 
         // load r1 => r2
-        fscanf(infile, "%c%d => %c%d", &dummy, &(instr->field1), 
-                                        &dummy, &(instr->field2));
+        sscanf(buff, "%c%d => %c%d",        &dummy, &(instr->field1), 
+                                            &dummy, &(instr->field2));
     }
-    else if (!strcmp(buff, "storeAI")) {
+    else if (!strncmp(opcode, "storeAI", 7)) {
         // storeAI r1 => r2, c3
         instr->opcode = STOREAI;
-        fscanf(infile, "%c%d => %c%d, %d", &dummy, &(instr->field1), 
+        sscanf(buff, "%c%d => %c%d, %d",    &dummy, &(instr->field1), 
                                             &dummy, &(instr->field2),
                                             &(instr->field3));
     }
-    else if (!strcmp(buff, "store")) {
+    else if (!strncmp(opcode, "store", 5)) {
         // store r1 => r2
         instr->opcode = STORE;
-        fscanf(infile, "%c%d => %c%d", &dummy, &(instr->field1), 
-                                        &dummy, &(instr->field2));
+        sscanf(buff, "%c%d => %c%d",        &dummy, &(instr->field1), 
+                                            &dummy, &(instr->field2));
     }
-    else if (!strcmp(buff, "add")) {
+    else if (!strncmp(opcode, "add", 3)) {
         // add r1, r2 => r3
         instr->opcode = ADD;
-        fscanf(infile, "%c%d , %c%d => %c%d",&dummy, &(instr->field1), 
-                                             &dummy, &(instr->field2),
-                                             &dummy, &(instr->field3));
+        sscanf(buff, "%c%d , %c%d => %c%d", &dummy, &(instr->field1), 
+                                            &dummy, &(instr->field2),
+                                            &dummy, &(instr->field3));
     }
-    else if (!strcmp(buff, "sub")) {
+    else if (!strncmp(opcode, "sub", 3)) {
         // sub r1, r2 => r3
         instr->opcode = SUB;
-        fscanf(infile, "%c%d , %c%d => %c%d", &dummy, &(instr->field1), 
-                                              &dummy, &(instr->field2),
-                                              &dummy, &(instr->field3));
+        sscanf(buff, "%c%d , %c%d => %c%d", &dummy, &(instr->field1), 
+                                            &dummy, &(instr->field2),
+                                            &dummy, &(instr->field3));
     }
-    else if (!strcmp(buff, "mul")) {
+    else if (!strncmp(opcode, "mul", 3)) {
         // mul r1, r2 => r3
         instr->opcode = MUL;
-        fscanf(infile, "%c%d , %c%d => %c%d", &dummy, &(instr->field1), 
-                                              &dummy, &(instr->field2),
-                                              &dummy, &(instr->field3));
+        sscanf(buff, "%c%d , %c%d => %c%d", &dummy, &(instr->field1), 
+                                            &dummy, &(instr->field2),
+                                            &dummy, &(instr->field3));
     }
-    else if (!strcmp(buff, "div")) {
+    else if (!strncmp(opcode, "div", 3)) {
         // sub r1, r2 => r3
         instr->opcode = DIV;
-        fscanf(infile, "%c%d , %c%d => %c%d", &dummy, &(instr->field1), 
-                                              &dummy, &(instr->field2),
-                                              &dummy, &(instr->field3));
+        sscanf(buff, "%c%d , %c%d => %c%d", &dummy, &(instr->field1), 
+                                            &dummy, &(instr->field2),
+                                            &dummy, &(instr->field3));
     }
-    else if (!strcmp(buff, "lshift")) {
+    else if (!strncmp(opcode, "lshift", 6)) {
         // lshift r1, r2 => r3
         instr->opcode = LSHIFT;
-        fscanf(infile, "%c%d , %c%d => %c%d", &dummy, &(instr->field1), 
-                                              &dummy, &(instr->field2),
-                                              &dummy, &(instr->field3));
+        sscanf(buff, "%c%d , %c%d => %c%d", &dummy, &(instr->field1), 
+                                            &dummy, &(instr->field2),
+                                            &dummy, &(instr->field3));
     }
-    else if (!strcmp(buff, "rshift")) {
+    else if (!strncmp(opcode, "rshift", 6)) {
         // rshift r1, r2 => r3
         instr->opcode = RSHIFT;
-        fscanf(infile, "%c%d , %c%d => %c%d", &dummy, &(instr->field1), 
-                                              &dummy, &(instr->field2),
-                                              &dummy, &(instr->field3));
+        sscanf(buff, "%c%d , %c%d => %c%d", &dummy, &(instr->field1), 
+                                            &dummy, &(instr->field2),
+                                            &dummy, &(instr->field3));
     }
-    else if (!strcmp(buff, "output")) {
+    else if (!strncmp(opcode, "output", 6)) {
         // output r1, c1
         instr->opcode = OUTPUT;
-        fscanf(infile, "%c%d , %c%d", &dummy, &(instr->field1), 
-                                      &dummy, &(instr->field2));
+        sscanf(buff, "%c%d , %c%d",         &dummy, &(instr->field1), 
+                                            &dummy, &(instr->field2));
     }
     else {
         free(instr);
@@ -139,13 +127,19 @@ Instruction *ReadInstruction(FILE *infile) {
 
 Instruction *ReadInstructionList(FILE *infile) {
     Instruction *instr, *head, *tail;
+    char buff[100];
+
 
     if (!infile) {
         fprintf(stderr, "error: file error\n");
         exit(EXIT_FAILURE);
     }
     head = tail = NULL;
-    while ((instr = ReadInstruction(infile))) {
+    while (fscanf(infile, " %99[^\n]", buff) != EOF) {
+        instr = ReadInstruction(buff);
+        if (!instr) {
+            continue;
+        }
         if (!head) {
             head = tail = instr;
             continue;
