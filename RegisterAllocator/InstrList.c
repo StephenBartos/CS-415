@@ -195,7 +195,7 @@ Instruction *ReadInstruction(char *buff) {
     else if (!strncmp(opcode, "output", 6)) {
         // output r1, c1
         instr->opcode = OUTPUT;
-        sscanf(buff, "%s %c%d , %c%d",            opcode, &dummy, &(instr->field1), 
+        sscanf(buff, "%s %c%d , %c%d",         opcode, &dummy, &(instr->field1), 
                                                &dummy, &(instr->field2));
     }
     else {
