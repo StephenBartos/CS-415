@@ -119,30 +119,30 @@ Instruction *ReadInstruction(char *buff) {
     if (!strncmp(opcode, "loadAI", 6)) {
         // loadAI r1, c1 => r2
         instr->opcode = LOADAI;
-        sscanf(buff, "%s %c%d , %d => %c%d",  opcode, 
-                                              &dummy, &(instr->field1),
-                                              &(instr->field2), &dummy, 
-                                              &(instr->field3));
+        sscanf(buff, "%s %c%d , %d => %c%d",   opcode, 
+                                               &dummy, &(instr->field1),
+                                               &(instr->field2), &dummy, 
+                                               &(instr->field3));
     }
     else if (!strncmp(opcode, "loadI", 5)) {
         // loadI c1 => r1
         instr->opcode = LOADI;
-        sscanf(buff, "%s %d => %c%d",         opcode,
-                                              &(instr->field1), 
-                                              &dummy, &(instr->field2));
+        sscanf(buff, "%s %d => %c%d",          opcode,
+                                               &(instr->field1), 
+                                               &dummy, &(instr->field2));
     }
     else if (!strncmp(opcode, "load", 4)) { 
         // load r1 => r2
         instr->opcode = LOADAI;
-        sscanf(buff, "%s %c%d => %c%d",       opcode, &dummy, &(instr->field1), 
-                                              &dummy, &(instr->field2));
+        sscanf(buff, "%s %c%d => %c%d",        opcode, &dummy, &(instr->field1), 
+                                               &dummy, &(instr->field2));
     }
     else if (!strncmp(opcode, "storeAI", 7)) {
         // storeAI r1 => r2, c3
         instr->opcode = STOREAI;
-        sscanf(buff, "%s %c%d => %c%d, %d",   opcode, &dummy, &(instr->field1), 
-                                              &dummy, &(instr->field2),
-                                              &(instr->field3));
+        sscanf(buff, "%s %c%d => %c%d, %d",    opcode, &dummy, &(instr->field1), 
+                                               &dummy, &(instr->field2),
+                                               &(instr->field3));
     }
     else if (!strncmp(opcode, "store", 5)) {
         // store r1 => r2
@@ -181,7 +181,7 @@ Instruction *ReadInstruction(char *buff) {
     else if (!strncmp(opcode, "lshift", 6)) {
         // lshift r1, r2 => r3
         instr->opcode = LSHIFT;
-        sscanf(buff, "%s %c%d , %c%d => %c%d",    opcode, &dummy, &(instr->field1), 
+        sscanf(buff, "%s %c%d , %c%d => %c%d", opcode, &dummy, &(instr->field1), 
                                                &dummy, &(instr->field2),
                                                &dummy, &(instr->field3));
     }
