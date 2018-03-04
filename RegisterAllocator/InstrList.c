@@ -5,14 +5,90 @@
 #include "Instr.h"
 
 void PrintInstruction(Instruction *instr) {
+    if (!instr) {
+        fprintf(stderr, "error: instruction list empty\n");
+        exit(EXIT_FAILURE);
+    }
+    switch (instr->opcode) {
+        case LOAD:
+            fprintf(stdout, "load r%d => r%d\n",        instr->field1, 
+                                                        instr->field2);
+            break;
 
+        case LOADI:
+            fprintf(stdout, "loadI %d => r%d\n",        instr->field1, 
+                                                        instr->field2);
+            break;
+
+        case LOADAI:
+            fprintf(stdout, "loadAI r%d, %d => r%d\n",  instr->field1, 
+                                                        instr->field2,
+                                                        instr->field3);
+            break;
+
+        case STORE:
+            fprintf(stdout, "store r%d => r%d\n",       instr->field1, 
+                                                        instr->field2);
+            break;
+
+        case STOREAI:
+            fprintf(stdout, "storeAI r%d, %d => r%d\n", instr->field1, 
+                                                        instr->field2,
+                                                        instr->field3);
+            break;
+
+        case ADD:
+            fprintf(stdout, "add r%d, r%d => r%d\n",    instr->field1, 
+                                                        instr->field2,
+                                                        instr->field3);
+            break;
+
+        case SUB:
+            fprintf(stdout, "sub r%d, r%d => r%d\n",    instr->field1, 
+                                                        instr->field2,
+                                                        instr->field3);
+            break;
+
+        case MUL:
+            fprintf(stdout, "mul r%d, r%d => r%d\n",    instr->field1, 
+                                                        instr->field2,
+                                                        instr->field3);
+            break;
+
+        case DIV:
+            fprintf(stdout, "div %d, r%d => r%d\n",     instr->field1, 
+                                                        instr->field2,
+                                                        instr->field3);
+            break;
+
+        case LSHIFT:
+            fprintf(stdout, "lshift %d, r%d => r%d\n",  instr->field1, 
+                                                        instr->field2,
+                                                        instr->field3);
+            break;
+
+        case RSHIFT:
+            fprintf(stdout, "rshift %d, r%d => r%d\n",  instr->field1, 
+                                                        instr->field2,
+                                                        instr->field3);
+            break;
+
+        case OUTPUT:
+            fprintf(stdout, "output %d, %d\n",          instr->field1, 
+                                                        instr->field2);
+            break;
+
+        default:
+            fprintf(stderr, "error: illegal instruction\n");
+            break;
+    }
 }
 
 void PrintInstructionList(Instruction *head) {
     Instruction *ptr = NULL;
 
     if (!head) {
-        fprintf(stderr, "error: no instructions given");
+        fprintf(stderr, "error: no instructions given\n");
         exit(EXIT_FAILURE);
     }
     ptr = head;
@@ -43,80 +119,84 @@ Instruction *ReadInstruction(char *buff) {
     if (!strncmp(opcode, "loadAI", 6)) {
         // loadAI r1, c1 => r2
         instr->opcode = LOADAI;
-        sscanf(buff, "%c%d , %d => %c%d",   &dummy, &(instr->field1),
-                                            &(instr->field2),
-                                            &dummy, &(instr->field3));
+        sscanf(buff, "%s %c%d , %d => %c%d",  opcode, 
+                                              &dummy, &(instr->field1),
+                                              &(instr->field2), &dummy, 
+                                              &(instr->field3));
     }
     else if (!strncmp(opcode, "loadI", 5)) {
         // loadI c1 => r1
-        sscanf(buff, "%d => %c%d",          &(instr->field1), 
-                                            &dummy, &(instr->field2));
+        instr->opcode = LOADI;
+        sscanf(buff, "%s %d => %c%d",         opcode,
+                                              &(instr->field1), 
+                                              &dummy, &(instr->field2));
     }
     else if (!strncmp(opcode, "load", 4)) { 
         // load r1 => r2
-        sscanf(buff, "%c%d => %c%d",        &dummy, &(instr->field1), 
-                                            &dummy, &(instr->field2));
+        instr->opcode = LOADAI;
+        sscanf(buff, "%s %c%d => %c%d",       opcode, &dummy, &(instr->field1), 
+                                              &dummy, &(instr->field2));
     }
     else if (!strncmp(opcode, "storeAI", 7)) {
         // storeAI r1 => r2, c3
         instr->opcode = STOREAI;
-        sscanf(buff, "%c%d => %c%d, %d",    &dummy, &(instr->field1), 
-                                            &dummy, &(instr->field2),
-                                            &(instr->field3));
+        sscanf(buff, "%s %c%d => %c%d, %d",   opcode, &dummy, &(instr->field1), 
+                                              &dummy, &(instr->field2),
+                                              &(instr->field3));
     }
     else if (!strncmp(opcode, "store", 5)) {
         // store r1 => r2
         instr->opcode = STORE;
-        sscanf(buff, "%c%d => %c%d",        &dummy, &(instr->field1), 
-                                            &dummy, &(instr->field2));
+        sscanf(buff, "%s %c%d => %c%d",        opcode, &dummy, &(instr->field1), 
+                                               &dummy, &(instr->field2));
     }
     else if (!strncmp(opcode, "add", 3)) {
         // add r1, r2 => r3
         instr->opcode = ADD;
-        sscanf(buff, "%c%d , %c%d => %c%d", &dummy, &(instr->field1), 
-                                            &dummy, &(instr->field2),
-                                            &dummy, &(instr->field3));
+        sscanf(buff, "%s %c%d , %c%d => %c%d", opcode, &dummy, &(instr->field1), 
+                                               &dummy, &(instr->field2),
+                                               &dummy, &(instr->field3));
     }
     else if (!strncmp(opcode, "sub", 3)) {
         // sub r1, r2 => r3
         instr->opcode = SUB;
-        sscanf(buff, "%c%d , %c%d => %c%d", &dummy, &(instr->field1), 
-                                            &dummy, &(instr->field2),
-                                            &dummy, &(instr->field3));
+        sscanf(buff, "%s %c%d , %c%d => %c%d", opcode, &dummy, &(instr->field1), 
+                                               &dummy, &(instr->field2), 
+                                               &dummy, &(instr->field3));
     }
     else if (!strncmp(opcode, "mul", 3)) {
         // mul r1, r2 => r3
         instr->opcode = MUL;
-        sscanf(buff, "%c%d , %c%d => %c%d", &dummy, &(instr->field1), 
-                                            &dummy, &(instr->field2),
-                                            &dummy, &(instr->field3));
+        sscanf(buff, "%s %c%d , %c%d => %c%d", opcode, &dummy, &(instr->field1), 
+                                               &dummy, &(instr->field2),
+                                               &dummy, &(instr->field3));
     }
     else if (!strncmp(opcode, "div", 3)) {
         // sub r1, r2 => r3
         instr->opcode = DIV;
-        sscanf(buff, "%c%d , %c%d => %c%d", &dummy, &(instr->field1), 
-                                            &dummy, &(instr->field2),
-                                            &dummy, &(instr->field3));
+        sscanf(buff, "%s %c%d , %c%d => %c%d", opcode, &dummy, &(instr->field1), 
+                                               &dummy, &(instr->field2),
+                                               &dummy, &(instr->field3));
     }
     else if (!strncmp(opcode, "lshift", 6)) {
         // lshift r1, r2 => r3
         instr->opcode = LSHIFT;
-        sscanf(buff, "%c%d , %c%d => %c%d", &dummy, &(instr->field1), 
-                                            &dummy, &(instr->field2),
-                                            &dummy, &(instr->field3));
+        sscanf(buff, "%s %c%d , %c%d => %c%d",    opcode, &dummy, &(instr->field1), 
+                                               &dummy, &(instr->field2),
+                                               &dummy, &(instr->field3));
     }
     else if (!strncmp(opcode, "rshift", 6)) {
         // rshift r1, r2 => r3
         instr->opcode = RSHIFT;
-        sscanf(buff, "%c%d , %c%d => %c%d", &dummy, &(instr->field1), 
-                                            &dummy, &(instr->field2),
-                                            &dummy, &(instr->field3));
+        sscanf(buff, "%s %c%d , %c%d => %c%d", opcode, &dummy, &(instr->field1), 
+                                               &dummy, &(instr->field2),
+                                               &dummy, &(instr->field3));
     }
     else if (!strncmp(opcode, "output", 6)) {
         // output r1, c1
         instr->opcode = OUTPUT;
-        sscanf(buff, "%c%d , %c%d",         &dummy, &(instr->field1), 
-                                            &dummy, &(instr->field2));
+        sscanf(buff, "%s %c%d , %c%d",            opcode, &dummy, &(instr->field1), 
+                                               &dummy, &(instr->field2));
     }
     else {
         free(instr);
