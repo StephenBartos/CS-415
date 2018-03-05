@@ -32,7 +32,7 @@ void PrintInstruction(Instruction *instr) {
             break;
 
         case STOREAI:
-            fprintf(stdout, "storeAI r%d, %d => r%d\n", instr->field1, 
+            fprintf(stdout, "storeAI r%d => r%d, %d\n", instr->field1, 
                                                         instr->field2,
                                                         instr->field3);
             break;
@@ -74,8 +74,7 @@ void PrintInstruction(Instruction *instr) {
             break;
 
         case OUTPUT:
-            fprintf(stdout, "output %d, %d\n",          instr->field1, 
-                                                        instr->field2);
+            fprintf(stdout, "output %d\n",          instr->field1);
             break;
 
         default:
@@ -195,8 +194,7 @@ Instruction *ReadInstruction(char *buff) {
     else if (!strncmp(opcode, "output", 6)) {
         // output r1, c1
         instr->opcode = OUTPUT;
-        sscanf(buff, "%s %c%d , %c%d",         opcode, &dummy, &(instr->field1), 
-                                               &dummy, &(instr->field2));
+        sscanf(buff, "%s %d",                  opcode, &(instr->field1));
     }
     else {
         free(instr);
