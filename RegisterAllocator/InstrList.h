@@ -8,5 +8,6 @@ void PrintInstruction(Instruction *);
 void PrintInstructionList(Instruction *);
 Instruction *ReadInstruction(char *);
 Instruction *ReadInstructionList(FILE *);
+void DestroyInstructionList(Instruction *);
 
 #endif

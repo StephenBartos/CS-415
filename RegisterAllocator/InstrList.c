@@ -207,11 +207,11 @@ Instruction *ReadInstructionList(FILE *infile) {
     Instruction *instr, *head, *tail;
     char buff[100];
 
-
     if (!infile) {
         fprintf(stderr, "error: file error\n");
         exit(EXIT_FAILURE);
     }
+
     head = tail = NULL;
     while (fscanf(infile, " %99[^\n]", buff) != EOF) {
         instr = ReadInstruction(buff);
@@ -228,4 +228,16 @@ Instruction *ReadInstructionList(FILE *infile) {
         tail = instr;
     }
     return head;
+}
+
+void DestroyInstructionList(Instruction *instr) {
+    Instruction *ptr;
+    if (!instr) {
+        return;
+    }
+    while (instr) {
+        ptr = instr;
+        instr = instr->next;
+        free(ptr);
+    }
 }
