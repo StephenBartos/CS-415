@@ -236,7 +236,6 @@ void InsertLoadAI(Instruction *instr, int reg, int num_regs) {
     if (!load) { 
         fprintf(stderr, "error: calloc allocation failed\n");
     }
-    printf("reg: %d\n", reg);
     load->opcode = LOADAI;
     load->field1 = 0;
     load->field2 = (-4) * (num_regs - reg);
@@ -275,11 +274,6 @@ void TopDownAllocSimple(Instruction *head, int k) {
 
     int pri_regs[num_regs];
     PrioritySort(vregs, pri_regs, num_regs);
-    for (int i = 0; i < num_regs; i++) {
-        printf("%d, ", pri_regs[i]);
-    }
-    printf("\n\n");
-
     SimpleAlloc(head, pri_regs, num_regs, k);
 }
 
