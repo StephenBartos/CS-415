@@ -1,0 +1,6 @@
+loadI 1024i    => r0
+loadI   5      => r1
+loadI   2      => r2
+add     r6, r2 => r3
+storeAI r3     => r0, 40
+output 1040

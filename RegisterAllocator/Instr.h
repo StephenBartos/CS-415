@@ -13,4 +13,3 @@ typedef struct _Instruction {
 } Instruction;
 
 #endif
-
