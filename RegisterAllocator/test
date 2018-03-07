@@ -1,8 +1,10 @@
-loadI 1024i    => r0
-loadI   5      => r1
-loadI   10     => r6
-loadI   2      => r2
-add     r1, r2 => r3
-sub     r3, r2 => r4
-storeAI r3     => r0, 40
-output 1040
+loadI 1024 => r0
+loadI 1020 => r1  
+load r1 => r2     
+mult r1, r2 => r3
+loadI 5 => r4   
+sub r4, r2 => r5
+loadI 8 => r6   
+mult r5, r6 => r7
+sub r7, r3 => r8
+store r8 => r9 

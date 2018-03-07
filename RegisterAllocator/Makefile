@@ -1,6 +1,6 @@
 
 CC=gcc
-CFLAGS=-Wall
+CFLAGS=-Wall -g
 DEPS=Instr.h InstrList.h
 OBJ=RegisterAllocator.o InstrList.o
 

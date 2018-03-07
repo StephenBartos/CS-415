@@ -8,6 +8,7 @@ typedef struct _Instruction {
     int field1;
     int field2;
     int field3;
+    int live[256];
     struct _Instruction *prev;
     struct _Instruction *next;
 } Instruction;

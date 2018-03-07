@@ -109,6 +109,7 @@ Instruction *ReadInstruction(char *buff) {
     }
     instr->next = NULL;
     instr->prev = NULL;
+    memset(instr->live, 0, sizeof(instr->live));
     if (strnlen(buff, sizeof(buff)) == 0) {
         // line is empty
         free(instr);
@@ -132,7 +133,7 @@ Instruction *ReadInstruction(char *buff) {
     }
     else if (!strncmp(opcode, "load", 4)) { 
         // load r1 => r2
-        instr->opcode = LOADAI;
+        instr->opcode = LOAD;
         sscanf(buff, "%s %c%d => %c%d",        opcode, &dummy, &(instr->field1), 
                                                &dummy, &(instr->field2));
     }
@@ -228,6 +229,17 @@ Instruction *ReadInstructionList(FILE *infile) {
         tail = instr;
     }
     return head;
+}
+
+Instruction *LastInstruction(Instruction *instr) {
+    if (!instr) {
+        fprintf(stderr, "error: no instructions given\n");
+        exit(EXIT_FAILURE);
+    }
+    while (instr->next) {
+        instr = instr->next;
+    }
+    return instr;
 }
 
 void DestroyInstructionList(Instruction *instr) {
