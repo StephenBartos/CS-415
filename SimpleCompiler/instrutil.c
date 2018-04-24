@@ -8,9 +8,9 @@
 #include <stdlib.h>
 #include "instrutil.h"
 
-static next_register = 1; /* register 0 is reserved */
-static next_label = 0;
-static next_offset = 0;
+static int next_register = 1; /* register 0 is reserved */
+static int next_label = 0;
+static int next_offset = 0;
 
 int NextRegister() 
 {

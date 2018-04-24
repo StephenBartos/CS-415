@@ -14,7 +14,12 @@ typedef enum type_expression {TYPE_INT=0, TYPE_BOOL, TYPE_ERROR} Type_Expression
 typedef struct {
         Type_Expression type;
         int targetRegister;
-        } regInfo;
+} regInfo;
+
+typedef struct _Node {
+    char *id;
+    typedef _Node * next;
+} IDList;
 
 #endif
 

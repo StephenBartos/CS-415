@@ -17,23 +17,17 @@ typedef enum opcode_name {NOP=0, ADDI, ADD, SUBI, SUB, MULT,
                           STORE, STOREAI, STOREAO, 
 			  BR, CBR, CMPLT, CMPLE, CMPEQ, CMPNE, CMPGE, CMPGT,
 			  OUTPUTAI, AND_INSTR, OR_INSTR} Opcode_Name;
-extern 
-FILE *outfile;
+extern FILE *outfile;
 
-extern
-int NextRegister();
+extern int NextRegister();
 
-extern
-int NextLabel();
+extern int NextLabel();
 
-extern
-int NextOffset(int units); /* units of 4 bytes */
+extern int NextOffset(int units); /* units of 4 bytes */
 
-extern
-void emitComment(char *comment);
+extern void emitComment(char *comment);
 
-extern 
-void emit(int label_index, 
+extern void emit(int label_index, 
 	  Opcode_Name opcode, 
 	  int field1, 
 	  int field2, 
@@ -41,7 +35,3 @@ void emit(int label_index,
 
 
 #endif /* _INSTRUCTION_H_ */
-
-
-
-

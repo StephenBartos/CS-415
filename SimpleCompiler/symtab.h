@@ -1,8 +1,8 @@
 /**********************************************
-        CS415  Project 2
-        Spring  2018
-        Student Version
-**********************************************/
+  CS415  Project 2
+  Spring  2018
+  Student Version
+ **********************************************/
 
 
 #ifndef SYMTAB_H
@@ -18,22 +18,17 @@
 
 
 typedef struct { /* need to augment this */
-  char *name;
-  int offset;
-  Type_Expression type;  
+    char *name;
+    int offset;
+    Type_Expression type;  
 } SymTabEntry;
 
-extern
-void InitSymbolTable();
+extern void InitSymbolTable();
 
-extern
-SymTabEntry * lookup(char *name);
+extern SymTabEntry * lookup(char *name);
 
-extern
-void insert(char *name, Type_Expression type, int offset);
+extern void insert(char *name, Type_Expression type, int offset);
 
-extern
-void PrintSymbolTable();
-
+extern void PrintSymbolTable();
 
 #endif
