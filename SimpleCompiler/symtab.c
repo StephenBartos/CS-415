@@ -28,7 +28,6 @@ static int hash(char *name) {
 
 void InitSymbolTable() {
     int i;
-    int dummy;
 
     HashTable = (SymTabEntry **) malloc (sizeof(SymTabEntry *) * HASH_TABLE_SIZE);
     for (i=0; i < HASH_TABLE_SIZE; i++)
@@ -53,7 +52,7 @@ SymTabEntry * lookup(char *name) {
 }
 
 
-void insert(char *name, Type_Expression type, int offset) {
+void insert(char *name, Type_Expression type, int offset, int isArray) {
     int currentIndex;
     int visitedSlots = 0;
 
@@ -76,6 +75,7 @@ void insert(char *name, Type_Expression type, int offset) {
     strcpy(HashTable[currentIndex]->name, name);
     HashTable[currentIndex]->type = type; /* type expression */
     HashTable[currentIndex]->offset = offset; /* in bytes */
+    HashTable[currentIndex]->isArray = isArray;
 }
 
 static char * TypeToString(Type_Expression type)
@@ -92,12 +92,19 @@ static char * TypeToString(Type_Expression type)
 
 void PrintSymbolTable() {
     int i;
+    char *prefix;
 
     printf("\n --- Symbol Table ---------------\n\n");
     for (i=0; i < HASH_TABLE_SIZE; i++) {
         if (HashTable[i] != NULL) {
-            printf("\t \"%s\" of type %s with offset %d\n", 
-                    HashTable[i]->name, TypeToString(HashTable[i]->type), HashTable[i]->offset); 
+            if (HashTable[i]->isArray) {
+                prefix = "1-DIM ARRAY";
+            }
+            else {
+                prefix = "SCALAR";
+            }
+            printf("\t%s \"%s\" of type %s with offset %d\n", 
+                        prefix, HashTable[i]->name, TypeToString(HashTable[i]->type), HashTable[i]->offset); 
         }
     }
     printf("\n --------------------------------\n\n");

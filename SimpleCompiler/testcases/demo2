@@ -1,5 +1,5 @@
 program main;
-var a, b, c: boolean; d, e, f: integer
+var a, b, c: boolean; d, e, f: integer;
 begin
   a := true;
   b := false;
