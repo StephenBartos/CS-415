@@ -32,7 +32,7 @@ Clean the directory of files generated during compilation by typing:
 ```./codegen < input_file```
 where "input file" is file containing some program for this language
 
-# BNF Grammar Specification for input language
+# BNF Grammar Specification
 ```
 program:    PROG ID ';' block PERIOD 
 
