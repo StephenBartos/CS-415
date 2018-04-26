@@ -30,7 +30,6 @@ Clean the directory of files generated during compilation by typing:
 
 ## Running
 ```./codegen < input_file```
-where "input file" is file containing some program for this language
 
 # BNF Grammar Specification
 ```
