@@ -101,5 +101,6 @@ condexp:    exp NEQ exp
             | exp GT exp    
             | exp GEQ exp   
 
-ID := (A-Za-z)(A-Za-z)\*
+// Regular Expression, not rule
+ID := (A-Za-z)(A-Za-z)*
 ```
