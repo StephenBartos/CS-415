@@ -4,10 +4,10 @@ Using Bison and Flex, a parser and code generator (ILOC) is generated for a subs
 
 # Supported Statments
 Only the following statements are supported:
-* while-do,
-* if-then-else,
-* assignment,
-* print, and
+* while-do
+* if-then-else
+* assignment
+* print
 * compound
 
 Operators are restricted to:
