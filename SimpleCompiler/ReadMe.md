@@ -1,4 +1,4 @@
-# Simple Compiler For a Pascal-like Language, Rutgers CS415 Project2
+# Simple Compiler For a Pascal-like Language: Rutgers CS415 Project2
 
 Using Bison and Flex, a parser and code generator (ILOC) is generated for a subset of a Pascal-like language. There are no procedures in this language. Base types are limited to integer and boolean Composit types are limited to single-dimensional arrays of based types, indexed by integers (0-based indexing).
 
