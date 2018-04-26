@@ -34,14 +34,12 @@ int NextOffset(int units)
   return current_offset;
 }
 
-void
-emitComment(char *comment)
+void emitComment(char *comment)
 {
   fprintf(outfile, "\t// %s\n", comment);  
 }
 
-void
-emit(int label_index,
+void emit(int label_index,
      Opcode_Name opcode, 
      int field1, 
      int field2, 
@@ -154,7 +152,3 @@ emit(int label_index,
       fprintf(stderr, "Illegal instruction in \"emit\" \n");
     }
 }
-
-
-
-

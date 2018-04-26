@@ -24,6 +24,13 @@ typedef struct {
         Node *head;
 } regInfo; // "targetReg" in parse.y
 
+typedef struct {
+    int targetRegister;
+    int label1;
+    int label2;
+    int label3;
+} labelInfo;
+
 
 Node *push(Node *head, Node *new_node);
 void destroy(Node *head);

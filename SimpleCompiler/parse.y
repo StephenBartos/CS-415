@@ -11,7 +11,7 @@ char *CommentBuffer;
  
 %}
 
-%union {tokentype token; regInfo targetReg;}
+%union {tokentype token; regInfo targetReg; labelInfo label;}
 
 %token PROG PERIOD VAR 
 %token INT BOOL PRINT THEN IF DO  
@@ -27,6 +27,8 @@ char *CommentBuffer;
 %type <targetReg> idlist
 %type <targetReg> type
 %type <targetReg> stype
+%type <label>     WHILE
+%type <label>     condexp
 
 %start program
 
@@ -154,6 +156,7 @@ ifhead:     IF condexp { }
 writestmt:  PRINT '(' exp ')' 
             { 
                 int printOffset = -4; /* default location for printing */
+
                 sprintf(CommentBuffer, "Code for \"PRINT\" from offset %d", printOffset);
                 emitComment(CommentBuffer);
                 emit(NOLABEL, STOREAI, $3.targetRegister, 0, printOffset);
@@ -161,9 +164,31 @@ writestmt:  PRINT '(' exp ')'
             }
             ;
 
-wstmt:      WHILE  {  } 
-            condexp {  } 
-            DO stmt  {  } 
+wstmt:      WHILE 
+            {
+                int label1 = NextLabel();
+                int label2 = NextLabel();
+                int label3 = NextLabel();
+
+                $<label>$.label1 = label1;
+                $<label>$.label2 = label2;
+                $<label>$.label3 = label3;
+                emit(label1, NOP, EMPTY, EMPTY, EMPTY);
+                emitComment("Control code for \"WHILE DO\"");
+            }
+            condexp
+            {
+                int newReg = $3.targetRegister;
+
+                emit(NOLABEL, CBR, $<label>3.targetRegister, $<label>2.label2, $<label>2.label3);
+                emit($<label>2.label2, NOP, EMPTY, EMPTY, EMPTY);
+                emitComment("Body of \"WHILE\" construct starts here");
+            } 
+            DO stmt
+            {
+                emit(NOLABEL, BR, $<label>2.label1, EMPTY, EMPTY);
+                emit($<label>2.label3, NOP, EMPTY, EMPTY, EMPTY);
+            } 
             ;
 
 astmt:      lhs ASG exp 
@@ -206,7 +231,6 @@ exp:        exp '+' exp
                     printf("\n*** ERROR ***: Operand type must be integer.\n"); 
                 }
                 $$.type = $1.type;
-
                 $$.targetRegister = newReg;
                 emit(NOLABEL, ADD, $1.targetRegister, $3.targetRegister, newReg);
             }
@@ -218,7 +242,6 @@ exp:        exp '+' exp
                     printf("\n*** ERROR ***: Operand type must be integer.\n"); 
                 }
                 $$.type = $1.type;
-
                 $$.targetRegister = newReg;
                 emit(NOLABEL, SUB, $1.targetRegister, $3.targetRegister, newReg);
             }
@@ -230,7 +253,6 @@ exp:        exp '+' exp
                     printf("\n*** ERROR ***: Operand type must be integer.\n"); 
                 }
                 $$.type = $1.type;
-
                 $$.targetRegister = newReg;
                 emit(NOLABEL, MULT, $1.targetRegister, $3.targetRegister, newReg);
             }
@@ -242,7 +264,6 @@ exp:        exp '+' exp
                     printf("\n*** ERROR ***: Operand type must be boolean.\n"); 
                 }
                 $$.type = $1.type;
-
                 $$.targetRegister = newReg;
                 emit(NOLABEL, AND_INSTR, $1.targetRegister, $3.targetRegister, newReg);
             } 
@@ -254,7 +275,6 @@ exp:        exp '+' exp
                     printf("\n*** ERROR ***: Operand type must be boolean.\n"); 
                 }
                 $$.type = $1.type;
-
                 $$.targetRegister = newReg;
                 emit(NOLABEL, OR_INSTR, $1.targetRegister, $3.targetRegister, newReg);
             }
@@ -263,6 +283,7 @@ exp:        exp '+' exp
                 int newReg = NextRegister();
                 int offset = 0;
                 SymTabEntry *entry = lookup($1.str);
+
                 if (!entry) {
                     printf("\n*** ERROR ***: Variable %s not declared.\n", $1.str); 
                 }
@@ -276,11 +297,12 @@ exp:        exp '+' exp
                 emitComment(CommentBuffer);
                 emit(NOLABEL, LOADAI, 0, offset, newReg);
             }
-            | ID '[' exp ']'
+            | ID '[' exp ']' // needs work
             { 
                 int newReg = NextRegister();
                 int offset = 0;
                 SymTabEntry *entry = lookup($1.str);
+
                 if (!entry) {
                     printf("\n*** ERROR ***: Variable %s not declared.\n", $1.str); 
                 }
@@ -298,6 +320,7 @@ exp:        exp '+' exp
             | ICONST 
             {
                 int newReg = NextRegister();
+
                 $$.targetRegister = newReg;
                 $$.type = TYPE_INT;
                 emit(NOLABEL, LOADI, $1.num, newReg, EMPTY); 
@@ -305,6 +328,7 @@ exp:        exp '+' exp
             | TRUE 
             {
                 int newReg = NextRegister(); /* TRUE is encoded as value '1' */
+
                 $$.targetRegister = newReg;
                 $$.type = TYPE_BOOL;
                 emit(NOLABEL, LOADI, 1, newReg, EMPTY);
@@ -330,6 +354,7 @@ condexp:    exp NEQ exp
                 if ($1.type != $3.type) {
                     printf("\n*** ERROR ***: == or != operator with different types.\n"); 
                 }
+                $$.targetRegister = newReg;
                 emit(NOLABEL, CMPNE, $1.targetRegister, $3.targetRegister, newReg);
             } 
             | exp EQ exp
@@ -338,6 +363,7 @@ condexp:    exp NEQ exp
                 if ($1.type != $3.type) {
                     printf("\n*** ERROR ***: == or != operator with different types.\n"); 
                 }
+                $$.targetRegister = newReg;
                 emit(NOLABEL, CMPEQ, $1.targetRegister, $3.targetRegister, newReg);
             }
             | exp LT exp
@@ -346,6 +372,7 @@ condexp:    exp NEQ exp
                 if (!($1.type == TYPE_INT && $3.type == TYPE_INT)) {
                     printf("\n*** ERROR ***: Relational operator with illegal type.\n");
                 }
+                $$.targetRegister = newReg;
                 emit(NOLABEL, CMPLT, $1.targetRegister, $3.targetRegister, newReg);
             }
             | exp LEQ exp
@@ -354,6 +381,7 @@ condexp:    exp NEQ exp
                 if (!($1.type == TYPE_INT && $3.type == TYPE_INT)) {
                     printf("\n*** ERROR ***: Relational operator with illegal type.\n");
                 }
+                $$.targetRegister = newReg;
                 emit(NOLABEL, CMPLE, $1.targetRegister, $3.targetRegister, newReg);
             }
             | exp GT exp
@@ -362,6 +390,7 @@ condexp:    exp NEQ exp
                 if (!($1.type == TYPE_INT && $3.type == TYPE_INT)) {
                     printf("\n*** ERROR ***: Relational operator with illegal type.\n");
                 }
+                $$.targetRegister = newReg;
                 emit(NOLABEL, CMPGT, $1.targetRegister, $3.targetRegister, newReg);
             }
             | exp GEQ exp
@@ -370,6 +399,7 @@ condexp:    exp NEQ exp
                 if (!($1.type == TYPE_INT && $3.type == TYPE_INT)) {
                     printf("\n*** ERROR ***: Relational operator with illegal type.\n");
                 }
+                $$.targetRegister = newReg;
                 emit(NOLABEL, CMPGE, $1.targetRegister, $3.targetRegister, newReg);
             }
             | error
