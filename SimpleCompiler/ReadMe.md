@@ -20,7 +20,7 @@ The parser supports semantic analysis (e.g. type checking) and compiles the inpu
 # Usage
 
 ## Prerequsites
-* [Bison]<https://www.gnu.org/software/bison/> and [Flex]<https://www.gnu.org/software/flex/>
+* [Bison](https://www.gnu.org/software/bison/) and [Flex](https://github.com/westes/flex)
 
 ## Compiling
 Use the added Makefile to compile by typing:
@@ -104,3 +104,4 @@ condexp:    exp NEQ exp
 // Regular Expression, not rule
 ID := (A-Za-z)(A-Za-z)*
 ```
+# ILOC Subset Generated
