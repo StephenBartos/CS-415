@@ -28,6 +28,7 @@ char *CommentBuffer;
 %type <targetReg> type
 %type <targetReg> stype
 %type <label>     WHILE
+%type <label>     ifhead
 %type <label>     condexp
 
 %start program
@@ -145,12 +146,37 @@ cmpdstmt:   BEG stmtlist END { }
             ;
 
 ifstmt:     ifhead
-            THEN stmt 
-            ELSE 
-            stmt 
+            {
+                int label1 = NextLabel();
+                int label2 = NextLabel();
+                int label3 = NextLabel();
+
+                $<label>$.label1 = label1;
+                $<label>$.label2 = label2;
+                $<label>$.label3 = label3;
+
+                emit(NOLABEL, CBR, $<label>1.targetRegister, label1, label2);
+                emit(label1, NOP, EMPTY, EMPTY, EMPTY);
+                emitComment("This is the \"true\" branch");
+            }
+            THEN stmt
+            {
+                emitComment("Branch to statement following the \"else\" statement list");
+                emit(NOLABEL, BR, $<label>2.label3, EMPTY, EMPTY);
+                emit($<label>2.label2, NOP, EMPTY, EMPTY, EMPTY);
+                emitComment("This is the \"false\" branch");
+            }
+            ELSE {}
+            stmt
+            {
+                emit($<label>2.label3, NOP, EMPTY, EMPTY, EMPTY);
+            }
             ;
 
-ifhead:     IF condexp { }
+ifhead:     IF condexp
+            {
+                $$.targetRegister = $2.targetRegister;
+            }
             ;
 
 writestmt:  PRINT '(' exp ')' 
@@ -178,8 +204,6 @@ wstmt:      WHILE
             }
             condexp
             {
-                int newReg = $3.targetRegister;
-
                 emit(NOLABEL, CBR, $<label>3.targetRegister, $<label>2.label2, $<label>2.label3);
                 emit($<label>2.label2, NOP, EMPTY, EMPTY, EMPTY);
                 emitComment("Body of \"WHILE\" construct starts here");
@@ -196,7 +220,6 @@ astmt:      lhs ASG exp
                 if ($1.type != $3.type) {
                     printf("*** ERROR ***: Assignment types do not match.\n");
                 }
-
                 emit(NOLABEL, STORE, $3.targetRegister, $1.targetRegister, EMPTY);
             }
             ;
