@@ -73,8 +73,13 @@ vardcl:     idlist ':' type
                 Node *ptr = $1.head;
 
                 while (ptr) {
-                    offset = NextOffset(1);
                     id_name = ptr->name;
+                    if ($3.isArray) {
+                        offset = NextOffset($3.size);
+                    }
+                    else {
+                        offset = NextOffset(1);
+                    }
                     insert(id_name, $3.type, offset, $3.isArray);
                     ptr = ptr->next;
                 }
@@ -86,7 +91,7 @@ idlist:     idlist ',' ID
             { 
                 Node *new_node = malloc(sizeof(Node));
                 if (!new_node) {
-                // malloc failure
+                    printf("\n***ERROR***: Malloc failed to allocate\n");
                 }
                 new_node->name = $3.str;
                 new_node->next = NULL;
@@ -98,7 +103,7 @@ idlist:     idlist ',' ID
             {
                 Node *new_node = malloc(sizeof(Node));
                 if (!new_node) {
-                // malloc failure
+                    printf("\n***ERROR***: Malloc failed to allocate\n");
                 }
                 new_node->name = $1.str;
                 new_node->next = NULL;
@@ -110,6 +115,7 @@ type:       ARRAY '[' ICONST ']' OF stype
             {
                 $$.type = $6.type;
                 $$.isArray = 1;
+                $$.size = $3.num;
             }
             | stype
             { 
@@ -234,16 +240,46 @@ lhs:        ID
                 if (!entry) {
                     printf("\n*** ERROR ***: Variable %s not declared.\n", $1.str);
                 }
+                if (entry->isArray) {
+                    printf("\n*** ERROR ***: Variable %s is not a scalar variable.\n", $1.str); 
+                }
                 $$.targetRegister = newReg2;
                 $$.type = entry->type;
                 offset = entry->offset;
-                sprintf(CommentBuffer, "Compute address of variable \"%s\" at offset %d in register %d", 
-                                                                      $1.str,       offset,        newReg2);
+
+                sprintf(CommentBuffer, "Compute address of variable \"%s\" at offset %d in register %d", $1.str, offset, newReg2);
                 emitComment(CommentBuffer);
                 emit(NOLABEL, LOADI, offset, newReg1, EMPTY);
                 emit(NOLABEL, ADD, 0, newReg1, newReg2);
             }
-            | ID '[' exp ']'       { }
+            | ID '[' exp ']'
+            {
+                int targetRegister = NextRegister();
+                int newReg1 = NextRegister();
+                int newReg2 = NextRegister();
+                int newReg3 = NextRegister();
+                int newReg4 = NextRegister();
+                int baseAddr= 0;
+                SymTabEntry *entry = lookup($1.str);
+
+                if (!entry) {
+                    printf("\n*** ERROR ***: Variable %s not declared.\n", $1.str);
+                }
+                if (!entry->isArray) {
+                    printf("\n*** ERROR ***: Variable %s is not an array variable.\n", $1.str); 
+                }
+                baseAddr = entry->offset;
+                $$.targetRegister = targetRegister;
+                $$.type = entry->type;
+
+                sprintf(CommentBuffer, "Compute address of array variable \"%s\" with base address %d", $1.str, baseAddr);
+                emitComment(CommentBuffer);
+                emit(NOLABEL, LOADI, 4, newReg1, EMPTY); // each array entry is 4 bytes
+                emit(NOLABEL, MULT,  $3.targetRegister, newReg1, newReg2); // compute address of index: (4 * index)
+                emit(NOLABEL, LOADI, baseAddr, newReg3, EMPTY); // load baseAddr
+                emit(NOLABEL, ADD,  newReg3, newReg2, newReg4); // compute offset of array index: (4*index) + baseAddr
+                emit(NOLABEL, ADD,  0, newReg4, targetRegister); // compute location of index, store in targetRegister
+            }
             ;
 
 exp:        exp '+' exp 
@@ -320,10 +356,14 @@ exp:        exp '+' exp
                 emitComment(CommentBuffer);
                 emit(NOLABEL, LOADAI, 0, offset, newReg);
             }
-            | ID '[' exp ']' // needs work
+            | ID '[' exp ']'
             { 
-                int newReg = NextRegister();
-                int offset = 0;
+                int targetRegister = NextRegister();
+                int newReg1 = NextRegister();
+                int newReg2 = NextRegister();
+                int newReg3 = NextRegister();
+                int newReg4 = NextRegister();
+                int baseAddr = 0;
                 SymTabEntry *entry = lookup($1.str);
 
                 if (!entry) {
@@ -335,10 +375,17 @@ exp:        exp '+' exp
                 if ($3.type != TYPE_INT) {
                     printf("\n*** ERROR ***: Array variable %s index type must be integer.\n", $1.str);  
                 }
-                offset = entry->offset;
-                $$.targetRegister = newReg;
+                baseAddr = entry->offset;
+                $$.targetRegister = targetRegister;
                 $$.type = entry->type;
-                emit(NOLABEL, LOADAI, 0, offset, newReg);
+
+                sprintf(CommentBuffer, "Load RHS value of array variable \"%s\" with base address %d", $1.str, baseAddr);
+                emitComment(CommentBuffer);
+                emit(NOLABEL, LOADI, 4, newReg1, EMPTY); // each array entry is 4 bytes
+                emit(NOLABEL, MULT,  $3.targetRegister, newReg1, newReg2); // compute address of index: (4 * index)
+                emit(NOLABEL, LOADI, baseAddr, newReg3, EMPTY); // load baseAddr
+                emit(NOLABEL, ADD,  newReg3, newReg2, newReg4); // compute offset of array index: (4*index) + baseAddr
+                emit(NOLABEL, LOADAO, 0, newReg4, targetRegister);
             }
             | ICONST 
             {

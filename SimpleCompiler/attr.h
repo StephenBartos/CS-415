@@ -21,6 +21,7 @@ typedef struct {
         Type_Expression type;
         int targetRegister;
         int isArray;
+        int size;
         Node *head;
 } regInfo; // "targetReg" in parse.y
 
