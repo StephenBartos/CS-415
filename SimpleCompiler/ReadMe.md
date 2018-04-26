@@ -20,20 +20,20 @@ The parser supports semantic analysis (e.g. type checking) and compiles the inpu
 # Usage
 
 ## Prerequsites
-* Bison and Flex
+* [Bison]<https://www.gnu.org/software/bison/> and [Flex]<https://www.gnu.org/software/flex/>
 
 ## Compiling
 Use the added Makefile to compile by typing:
-'''make'''
-Clean the directory by typing:
-'''make clean'''
+```make```
+Clean the directory of files generated during compilation by typing:
+```make clean```
 
 ## Running
-'''./codegen < input_file'''
+```./codegen < input_file```
 where "input file" is file containing some program for this language
 
 # BNF Grammar Specification for input language
-'''
+```
 program:    PROG ID ';' block PERIOD 
 
 block:      variables cmpdstmt 
@@ -102,4 +102,4 @@ condexp:    exp NEQ exp
             | exp GEQ exp   
 
 ID := (A-Za-z)(A-Za-z)\*
-'''
+```
