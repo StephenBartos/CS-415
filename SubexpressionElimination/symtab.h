@@ -22,17 +22,13 @@ typedef struct { /* need to augment this */
   int offset;
 } SymTabEntry;
 
-extern
-void InitSymbolTable();
+extern void InitSymbolTable();
 
-extern
-SymTabEntry * lookup(char *name);
+extern SymTabEntry * lookup(char *name);
 
-extern
-void insert(char *name, int offset);
+extern void insert(char *name, int offset);
 
-extern
-void PrintSymbolTable();
+extern void PrintSymbolTable();
 
 
 #endif

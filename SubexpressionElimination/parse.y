@@ -77,7 +77,7 @@ writestmt: PRINT '(' exp ')' { int printOffset = -4; /* default location for pri
 astmt : ID ASG exp             { SymTabEntry *entry = lookup($1.str);
    	                         int emit_return;
                                    if (entry == NULL) { 
-                                     printf("ERROR: Variable \"%s\" not declared.\n");
+                                     printf("ERROR: Variable \"%s\" not declared.\n", $1.str);
                                      return -1;
                                    }                       
 
@@ -112,7 +112,7 @@ exp	: exp '+' exp		{ int newReg = NextRegister();
    	                          int emit_return;
 	                          
                                   if (entry == NULL) { 
-                                    printf("ERROR: Variable \"%s\" not declared.\n");
+                                    printf("ERROR: Variable \"%s\" not declared.\n", $1.str);
                                     return -1;
                                   }                       
 				  emit_return = emit(NOLABEL, LOADAI, 0, entry->offset, newReg);
