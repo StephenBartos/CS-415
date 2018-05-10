@@ -69,7 +69,7 @@ false		{ECHO;return(FALSE);}
 		ECHO;
 		c = input();
 		if (c != EOF) {unput(c); lines++; fprintf(yyout,"%d\t",lines);}
-	        else yyterminate();
+		else yyterminate();
 		}
 [ \t]		{ECHO;}
 [!@#$%^&|?]	{ECHO;

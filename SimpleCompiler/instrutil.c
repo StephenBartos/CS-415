@@ -8,9 +8,9 @@
 #include <stdlib.h>
 #include "instrutil.h"
 
-static int next_register = 1; /* register 0 is reserved */
-static int next_label = 0;
-static int next_offset = 0;
+static next_register = 1; /* register 0 is reserved */
+static next_label = 0;
+static next_offset = 0;
 
 int NextRegister() 
 {
@@ -34,12 +34,14 @@ int NextOffset(int units)
   return current_offset;
 }
 
-void emitComment(char *comment)
+void
+emitComment(char *comment)
 {
   fprintf(outfile, "\t// %s\n", comment);  
 }
 
-void emit(int label_index,
+void
+emit(int label_index,
      Opcode_Name opcode, 
      int field1, 
      int field2, 
@@ -152,3 +154,7 @@ void emit(int label_index,
       fprintf(stderr, "Illegal instruction in \"emit\" \n");
     }
 }
+
+
+
+

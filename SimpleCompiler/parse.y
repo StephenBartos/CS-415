@@ -237,20 +237,22 @@ lhs:        ID
                 int offset = 0;
                 SymTabEntry *entry = lookup($1.str);
 
-                if (!entry) {
+                if (entry) {
+                    if (entry->isArray) {
+                        printf("\n*** ERROR ***: Variable %s is not a scalar variable.\n", $1.str); 
+                    }
+                    $$.targetRegister = newReg2;
+                    $$.type = entry->type;
+                    offset = entry->offset;
+
+                    sprintf(CommentBuffer, "Compute address of variable \"%s\" at offset %d in register %d", $1.str, offset, newReg2);
+                    emitComment(CommentBuffer);
+                    emit(NOLABEL, LOADI, offset, newReg1, EMPTY);
+                    emit(NOLABEL, ADD, 0, newReg1, newReg2);
+                }
+                else {
                     printf("\n*** ERROR ***: Variable %s not declared.\n", $1.str);
                 }
-                if (entry->isArray) {
-                    printf("\n*** ERROR ***: Variable %s is not a scalar variable.\n", $1.str); 
-                }
-                $$.targetRegister = newReg2;
-                $$.type = entry->type;
-                offset = entry->offset;
-
-                sprintf(CommentBuffer, "Compute address of variable \"%s\" at offset %d in register %d", $1.str, offset, newReg2);
-                emitComment(CommentBuffer);
-                emit(NOLABEL, LOADI, offset, newReg1, EMPTY);
-                emit(NOLABEL, ADD, 0, newReg1, newReg2);
             }
             | ID '[' exp ']'
             {
@@ -262,23 +264,29 @@ lhs:        ID
                 int baseAddr= 0;
                 SymTabEntry *entry = lookup($1.str);
 
-                if (!entry) {
+                if (entry) {
+                    if (!entry->isArray) {
+                        printf("\n*** ERROR ***: Variable %s is not an array variable.\n", $1.str); 
+                    }
+                    if ($3.type != TYPE_INT) {
+                        printf("\n*** ERROR ***: Array variable %s index type must be integer.\n", $1.str);  
+                    }
+
+                    baseAddr = entry->offset;
+                    $$.targetRegister = targetRegister;
+                    $$.type = entry->type;
+
+                    sprintf(CommentBuffer, "Compute address of array variable \"%s\" with base address %d", $1.str, baseAddr);
+                    emitComment(CommentBuffer);
+                    emit(NOLABEL, LOADI, 4, newReg1, EMPTY); // each array entry is 4 bytes
+                    emit(NOLABEL, MULT,  $3.targetRegister, newReg1, newReg2); // compute address of index: (4 * index)
+                    emit(NOLABEL, LOADI, baseAddr, newReg3, EMPTY); // load baseAddr
+                    emit(NOLABEL, ADD,  newReg3, newReg2, newReg4); // compute offset of array index: (4*index) + baseAddr
+                    emit(NOLABEL, ADD,  0, newReg4, targetRegister); // compute location of index, store in targetRegister
+                }
+                else {
                     printf("\n*** ERROR ***: Variable %s not declared.\n", $1.str);
                 }
-                if (!entry->isArray) {
-                    printf("\n*** ERROR ***: Variable %s is not an array variable.\n", $1.str); 
-                }
-                baseAddr = entry->offset;
-                $$.targetRegister = targetRegister;
-                $$.type = entry->type;
-
-                sprintf(CommentBuffer, "Compute address of array variable \"%s\" with base address %d", $1.str, baseAddr);
-                emitComment(CommentBuffer);
-                emit(NOLABEL, LOADI, 4, newReg1, EMPTY); // each array entry is 4 bytes
-                emit(NOLABEL, MULT,  $3.targetRegister, newReg1, newReg2); // compute address of index: (4 * index)
-                emit(NOLABEL, LOADI, baseAddr, newReg3, EMPTY); // load baseAddr
-                emit(NOLABEL, ADD,  newReg3, newReg2, newReg4); // compute offset of array index: (4*index) + baseAddr
-                emit(NOLABEL, ADD,  0, newReg4, targetRegister); // compute location of index, store in targetRegister
             }
             ;
 
@@ -343,18 +351,20 @@ exp:        exp '+' exp
                 int offset = 0;
                 SymTabEntry *entry = lookup($1.str);
 
-                if (!entry) {
+                if (entry) {
+                    if (entry->isArray) {
+                        printf("\n*** ERROR ***: Variable %s is not a scalar variable.\n", $1.str); 
+                    }
+                    offset = entry->offset;
+                    $$.targetRegister = newReg;
+                    $$.type = entry->type;
+                    sprintf(CommentBuffer, "Load RHS value of variable \"%s\" at offset %d", $1.str, offset);
+                    emitComment(CommentBuffer);
+                    emit(NOLABEL, LOADAI, 0, offset, newReg);
+                }
+                else {
                     printf("\n*** ERROR ***: Variable %s not declared.\n", $1.str); 
                 }
-                if (entry->isArray) {
-                    printf("\n*** ERROR ***: Variable %s is not a scalar variable.\n", $1.str); 
-                }
-                offset = entry->offset;
-                $$.targetRegister = newReg;
-                $$.type = entry->type;
-                sprintf(CommentBuffer, "Load RHS value of variable \"%s\" at offset %d", $1.str, offset);
-                emitComment(CommentBuffer);
-                emit(NOLABEL, LOADAI, 0, offset, newReg);
             }
             | ID '[' exp ']'
             { 
@@ -366,26 +376,28 @@ exp:        exp '+' exp
                 int baseAddr = 0;
                 SymTabEntry *entry = lookup($1.str);
 
-                if (!entry) {
+                if (entry) {
+                    if (!entry->isArray) {
+                        printf("\n*** ERROR ***: Variable %s is not an array variable.\n", $1.str);
+                    }
+                    if ($3.type != TYPE_INT) {
+                        printf("\n*** ERROR ***: Array variable %s index type must be integer.\n", $1.str);  
+                    }
+                    baseAddr = entry->offset;
+                    $$.targetRegister = targetRegister;
+                    $$.type = entry->type;
+
+                    sprintf(CommentBuffer, "Load RHS value of array variable \"%s\" with base address %d", $1.str, baseAddr);
+                    emitComment(CommentBuffer);
+                    emit(NOLABEL, LOADI, 4, newReg1, EMPTY); // each array entry is 4 bytes
+                    emit(NOLABEL, MULT,  $3.targetRegister, newReg1, newReg2); // compute address of index: (4 * index)
+                    emit(NOLABEL, LOADI, baseAddr, newReg3, EMPTY); // load baseAddr
+                    emit(NOLABEL, ADD,  newReg3, newReg2, newReg4); // compute offset of array index: (4*index) + baseAddr
+                    emit(NOLABEL, LOADAO, 0, newReg4, targetRegister);
+                }
+                else {
                     printf("\n*** ERROR ***: Variable %s not declared.\n", $1.str); 
                 }
-                if (!entry->isArray) {
-                    printf("\n*** ERROR ***: Variable %s is not an array variable.\n", $1.str);
-                }
-                if ($3.type != TYPE_INT) {
-                    printf("\n*** ERROR ***: Array variable %s index type must be integer.\n", $1.str);  
-                }
-                baseAddr = entry->offset;
-                $$.targetRegister = targetRegister;
-                $$.type = entry->type;
-
-                sprintf(CommentBuffer, "Load RHS value of array variable \"%s\" with base address %d", $1.str, baseAddr);
-                emitComment(CommentBuffer);
-                emit(NOLABEL, LOADI, 4, newReg1, EMPTY); // each array entry is 4 bytes
-                emit(NOLABEL, MULT,  $3.targetRegister, newReg1, newReg2); // compute address of index: (4 * index)
-                emit(NOLABEL, LOADI, baseAddr, newReg3, EMPTY); // load baseAddr
-                emit(NOLABEL, ADD,  newReg3, newReg2, newReg4); // compute offset of array index: (4*index) + baseAddr
-                emit(NOLABEL, LOADAO, 0, newReg4, targetRegister);
             }
             | ICONST 
             {
